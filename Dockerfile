@@ -20,4 +20,4 @@ COPY . /app
 EXPOSE 8080
 
 # Start the app using Gunicorn (replace 'app' if your module name is different)
-CMD ["gunicorn", "app:app"]
+CMD ["gunicorn", "-b", "0.0.0.0:8080", "app:app"]
