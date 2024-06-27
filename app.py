@@ -2,7 +2,7 @@
 
 
 from flask import Flask, render_template, request, send_from_directory, redirect, url_for,send_file, abort
-import streamlit as st
+# import streamlit as st
 import socket
 import os
 from werkzeug.datastructures import FileStorage
