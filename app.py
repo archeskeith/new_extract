@@ -7,7 +7,7 @@ import socket
 import os
 from werkzeug.datastructures import FileStorage
 from openpyxl import Workbook, load_workbook
-from pyngrok import ngrok
+# from pyngrok import ngrok
 from flask_ngrok import run_with_ngrok
 # from dotenv import load_dotenv
 from flask_cors import CORS, cross_origin
