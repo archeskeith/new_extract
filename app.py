@@ -8,7 +8,7 @@ import os
 from werkzeug.datastructures import FileStorage
 from openpyxl import Workbook, load_workbook
 # from pyngrok import ngrok
-from flask_ngrok import run_with_ngrok
+# from flask_ngrok import run_with_ngrok
 # from dotenv import load_dotenv
 from flask_cors import CORS, cross_origin
 import shutil
@@ -50,7 +50,7 @@ import sys
 
 
 app = Flask(__name__, static_url_path='/static')
-run_with_ngrok(app)
+# run_with_ngrok(app)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 UPLOAD_FOLDER = os.path.join('static', 'img_photo')
