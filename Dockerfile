@@ -19,6 +19,5 @@ COPY . /app
 # Expose the port (replace with the correct port if needed)
 EXPOSE 8080
 
-# Start the app using Gunicorn (replace 'app' if your module name is different)
-# CMD ["waitress-serve", "--port=8080", "app:app"]  # Replace 'app' if needed
-CMD ["gunicorn", "app:app"]
+# Start the app using Waitress
+CMD ["waitress-serve", "--port=8080", "main:app"] 
