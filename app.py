@@ -362,18 +362,22 @@ def send_url():
     return public_url
 
 
+# if __name__ == '__main__':
+#     from waitress import serve
+#     serve(app, host="0.0.0.0", port=8080)  # Replace 8080 with your port
+
 if __name__ == '__main__':
     from waitress import serve
-    serve(app, host="0.0.0.0", port=8080)  # Replace 8080 with your port
+    serve(app, host="0.0.0.0", port=8080)  # Use 8080
 
 # if __name__ == '__main__':
 #     app.run()
 
-if __name__ == '__main__':
-# print('accessing global link, click: ',public_url)
-    # app.run(port=port_no)
-    # Define the URL of your Flask app
-    # flask_app_url = public_url
-    app.run(port=80)
+# if __name__ == '__main__':
+# # print('accessing global link, click: ',public_url)
+#     # app.run(port=port_no)
+#     # Define the URL of your Flask app
+#     # flask_app_url = public_url
+#     app.run(port=80)
     
     # st.markdown(f'<iframe src="{flask_app_url}" width="100%" height="1000px" scrolling="yes"></iframe>', unsafe_allow_html=True)
