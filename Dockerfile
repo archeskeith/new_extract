@@ -21,4 +21,4 @@ EXPOSE 8080
 ENV PORT=8080 
 
 # Start the app using waitress-serve
-CMD ["waitress-serve", "--port=8080", "app:app"] 
+CMD ["gunicorn", "-b", "0.0.0.0:8080", "app:app"]
