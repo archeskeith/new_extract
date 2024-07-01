@@ -361,13 +361,18 @@ def uploaded_file(filename):
 def send_url():
     return public_url
 
+if __name__ == '__main__':
+    from waitress import serve
+    serve(app, host="0.0.0.0", port=8080)
 
 # if __name__ == '__main__':
 #     from waitress import serve
 #     serve(app, host="0.0.0.0", port=8080)  # Replace 8080 with your port
 
-from waitress import serve
-serve(app, host="0.0.0.0", port=8080)
+# from waitress import serve
+# serve(app, host="0.0.0.0", port=8080)
+
+
 
 # if __name__ == '__main__':
 #     app.run()
