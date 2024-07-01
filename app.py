@@ -362,8 +362,8 @@ def send_url():
     return public_url
     
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 8080))  # Get PORT if set, otherwise 8080
-    app.run(host="0.0.0.0", port=port, debug=True)  # Run the app
+    app.run(host='0.0.0.0', port=8080, debug=True) 
+
 
 # if __name__ == '__main__':
 #     from waitress import serve
