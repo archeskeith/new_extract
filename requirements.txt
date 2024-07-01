@@ -19,7 +19,7 @@ tabula_py==2.9.0
 Werkzeug==3.0.1
 gunicorn
 flask_cors
-waitress
+
 
 # absl-py==1.4.0
 # aiohttp==3.8.6
