@@ -18,7 +18,7 @@ COPY . /app
 # Expose the port (replace with the correct port if needed)
 EXPOSE 8080
 
-ENV PORT=8080 
+ENV PORT=8080
 
-# Start the app using waitress-serve
-CMD ["gunicorn", "-b", "0.0.0.0:8080", "app:app"]
+# Start the app using Gunicorn (assuming you're using Gunicorn)
+CMD ["gunicorn", "-b", "0.0.0.0:$PORT", "app:app"]  # Replace 'app' if needed
