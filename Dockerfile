@@ -20,4 +20,4 @@ COPY . /app
 EXPOSE 8080
 
 # Start the app using Waitress
-CMD ["waitress-serve", "--port=8080", "main:app"] 
+CMD ["waitress-serve", "--port=8080", "app:app"] 
