@@ -12,7 +12,6 @@ RUN apt-get update && \
     # pip install -r requirements.txt
     pip install --no-cache-dir -r requirements.txt
 
-
 # Copy your app code
 COPY . /app
 
@@ -21,5 +20,5 @@ EXPOSE 8080
 
 ENV PORT=8080 
 
-# Start the app using Waitress
+# Start the app using waitress-serve
 CMD ["waitress-serve", "--port=8080", "app:app"] 
