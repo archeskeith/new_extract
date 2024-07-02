@@ -5,6 +5,7 @@ from flask import Flask, render_template, request, send_from_directory, redirect
 # import streamlit as st
 import socket
 import os
+import shutil
 from werkzeug.datastructures import FileStorage
 from openpyxl import Workbook, load_workbook
 # from pyngrok import ngrok
@@ -200,8 +201,16 @@ def run_again():
     count = count_exported_csv_files(current_dir+'/output/')
     the_url = transfer_to_excel(count,my_dict)
     
-    delete_exported_csv_files(current_dir+'/output/')
-    delete_temp_files()
+    # Copy the Excel file to a permanent location
+    source_file = os.path.join(temp_dir, 'output', 'exported.xlsx')  # Use temp_dir
+    destination_file = os.path.join(current_dir, 'output', 'exported.xlsx')
+    shutil.copyfile(source_file, destination_file)
+
+    # Clean up the temporary directory
+    shutil.rmtree(temp_dir)
+    
+    # delete_exported_csv_files(current_dir+'/output/')
+    # delete_temp_files()
     
     # source_file = 'uploads/new_version.xlsx'
     # destination_file = os.path.join(current_dir, 'output', 'new_version.xlsx')
