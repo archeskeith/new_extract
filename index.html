@@ -41,7 +41,8 @@
         
 <!--             button was "button" before -->
 <!--             <button type="submit" class="btn btn-primary" onclick="updateFormAction()">Search</button> -->
-            <button type="button" class="btn btn-primary" onclick="document.getElementById('searchForm').submit()">Search</button>
+            <button id="searchButton" type="button" class="btn btn-primary">Search</button>
+<!--             <button type="button" class="btn btn-primary" onclick="document.getElementById('searchForm').submit()">Search</button> -->
         </form>
 
         {% if error %}
@@ -131,14 +132,26 @@
         //     document.getElementById("bankStatementFormContainer").style.display = 'none';
         // });
 
-        document.addEventListener('DOMContentLoaded', (event) => {
-            var searchWords = document.getElementById('search_words').value;
-            if (searchWords) { // Only set action if searchWords is not empty
-                document.getElementById('searchForm').action = '/?search_words=' + searchWords;
-            }
-            document.getElementById("bankStatementFormContainer").style.display = 'none';
-        });
+        // document.addEventListener('DOMContentLoaded', (event) => {
+        //     var searchWords = document.getElementById('search_words').value;
+        //     if (searchWords) { // Only set action if searchWords is not empty
+        //         document.getElementById('searchForm').action = '/?search_words=' + searchWords;
+        //     }
+        //     document.getElementById("bankStatementFormContainer").style.display = 'none';
+        // });
         
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const searchButton = document.getElementById('searchButton'); 
+
+            searchButton.addEventListener('click', function() {
+                var searchWords = document.getElementById('search_words').value;
+                if (searchWords) {
+                    document.getElementById('searchForm').action = '/?search_words=' + searchWords;
+                    document.getElementById('searchForm').submit();
+                }
+                document.getElementById("bankStatementFormContainer").style.display = 'none';
+            });
+        });
     </script>
 </body>
 </html>
