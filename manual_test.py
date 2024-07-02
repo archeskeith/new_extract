@@ -10,6 +10,7 @@ import string
 import concurrent.futures
 import json
 import signal
+import tempfile
 import PyPDF2
 from io import BytesIO
 import Levenshtein  
@@ -27,6 +28,7 @@ import csv
 import camelot
 from openpyxl import Workbook
 
+temp_dir = tempfile.mkdtemp()
 # from current chatgpt4 openapi API key access
 # open.api_key = "${{ secrets.OPENAI_KEY }}"
 # open.api_key = "${{ creds.api_key }}"
@@ -37,7 +39,8 @@ current_dir = os.getcwd()
 
 # count the number of pages a pdf has
 def count_pages(pdf_path):
-    with open(pdf_path, 'rb') as file:
+    # with open(pdf_path, 'rb') as file:\
+    with open(os.path.join(temp_dir, pdf_path), 'rb') as file:
         pdf_reader = PyPDF2.PdfFileReader(file)
         num_pages = pdf_reader.numPages        
         return num_pages
@@ -258,7 +261,8 @@ def statement_to_csv(input_statement,page):
     # splitting into lines
     lines = cleaned_statement.split('\n')
     print("PAGE CSV NUMBER: ",str(page))
-    with open(current_dir+'/output/exported'+str(page)+'.csv', 'w', newline='') as csv_file:
+    # with open(current_dir+'/output/exported'+str(page)+'.csv', 'w', newline='') as csv_file:
+    with open(os.path.join(temp_dir, 'output', f'exported{page}.csv'), 'w', newline='') as csv_file:  # Use temp_dir
         print(csv_file)
         csv_writer = csv.writer(csv_file)
 
