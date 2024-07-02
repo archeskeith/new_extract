@@ -243,11 +243,8 @@ def index():
             file = request.files['file']
             second_file = request.files['second_file']
 
-            # global_excel_file = request.files['excel_file']
-            # temp_filename = 'new_version.xlsx'
-            # global_excel_file = str('output/')+str(global_excel_file.filename)
+
             global_excel_file = str('output/')+'new_version.xlsx'
-            # global_excel_file = str('uploads/')+temp_filename
             
             if file.filename == '':
                 return render_template('index.html', error='No selected file')
@@ -261,6 +258,13 @@ def index():
             pdf_text = process_pdf(file,second_file,search_words)
 
             selected_results = []  #reset
+
+    else:  # Handle GET requests (initial page load)
+        search_words = request.args.get('search_words')
+        if search_words:
+            # ... (your existing search logic) ...
+        else:
+            return render_template('index.html', pdf_text=None, search_words=None)  # Render without redirecting
 
     return render_template('index.html', pdf_text=pdf_text, search_words=search_words)
 
