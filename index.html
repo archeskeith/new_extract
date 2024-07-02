@@ -41,7 +41,8 @@
         
 <!--             button was "button" before -->
 <!--             <button type="submit" class="btn btn-primary" onclick="updateFormAction()">Search</button> -->
-            <button id="searchButton" type="button" class="btn btn-primary">Search</button>
+<!--             <button id="searchButton" type="button" class="btn btn-primary">Search</button> -->
+            <button id="searchButton" type="button" class="btn btn-primary" onclick="document.getElementById('searchForm').submit()">Search</button>
 <!--             <button type="button" class="btn btn-primary" onclick="document.getElementById('searchForm').submit()">Search</button> -->
         </form>
 
@@ -49,7 +50,8 @@
             <p class="text-danger">{{ error }}</p>
         {% endif %}
 
-        {% if pdf_text %}
+
+        {% if pdf_text|length > 0 %}
             <form method="POST" action="/extract" id="extractForm" class="mt-4">
                 <h2>Search Results for '{{ search_words }}':</h2>
                 <table class="table">
@@ -87,12 +89,13 @@
                 <input type="hidden" name="search_words" value="{{ search_words }}">
                 <button type="submit" class="btn btn-success">Extract CSV</button>
                 
-            </form>
+                </form>
         {% else %}
             {% if search_words %}
                 <p class="mt-4">No results found.</p>
             {% endif %}
-        {% endif %}    
+        {% endif %}
+
 
         {% if csv_filename %}
             <p class="mt-4">CSV file '{{ csv_filename }}' has been extracted.</p>
