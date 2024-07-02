@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Check Exported Files</title>
-    <style>
+    <link rel="stylesheet" href="styles.css">
+<!--     <style>
         #dictionaryTextbox {
             text-align: left;
         }
@@ -47,7 +48,7 @@
         button:hover, input[type="submit"]:hover {
             background-color: #0056b3;
         }
-    </style>
+    </style> -->
 </head>
 <body>
     <div class="container">
@@ -142,13 +143,19 @@
         </form>
     </div>
     <script>
-        function goBack() {
-            // Change the form's action attribute to "/go_back"
+        // function goBack() {
+        //     // Change the form's action attribute to "/go_back"
             
-            document.getElementById("submitButtonFormCheckbox").action = "/go_back";
-            // Submit the form
-            document.getElementById("submitButtonFormCheckbox").submit();
-        }
+        //     document.getElementById("submitButtonFormCheckbox").action = "/go_back";
+        //     // Submit the form
+        //     document.getElementById("submitButtonFormCheckbox").submit();
+        // }
+        document.addEventListener('DOMContentLoaded', (event) => {
+            function goBack() {
+                document.getElementById("submitButtonFormCheckbox").action = "/go_back";
+                document.getElementById("submitButtonFormCheckbox").submit();
+            }
+        });
     </script>
 </body>
 </html>
