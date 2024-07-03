@@ -36,7 +36,9 @@
             <p class="text-danger">{{ error }}</p>
         {% endif %}
         <div id="resultsContainer"> 
-            {% if pdf_text|length > 0 %}
+            
+<!--             {% if pdf_text|length > 0 %} -->
+            {% if pdf_text and pdf_text|length > 0 %}
                 <form method="POST" action="/extract" id="extractForm" class="mt-4">
                     <h2>Search Results for '{{ search_words }}':</h2>
                     <table class="table">
