@@ -262,7 +262,9 @@ def index():
     else:  # Handle GET requests (initial page load)
         search_words = request.args.get('search_words')
         if search_words:
-            # ... (your existing search logic) ...
+            file = request.files['file']
+            second_file = request.files['second_file']
+            pdf_text = process_pdf(file, second_file, search_words)
         else:
             return render_template('index.html', pdf_text=None, search_words=None)  # Render without redirecting
 
