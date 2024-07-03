@@ -231,44 +231,36 @@ def back_to_home():
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    
     global global_excel_file
     global selected_results
     pdf_text = None
     search_words = None
+    error = None  # Initialize error variable
 
     if request.method == 'POST':
         if request.files['file'].filename != '':
-            
             file = request.files['file']
             second_file = request.files['second_file']
 
+            global_excel_file = str('output/') + 'new_version.xlsx'
 
-            global_excel_file = str('output/')+'new_version.xlsx'
-            
             if file.filename == '':
-                return render_template('index.html', error='No selected file')
+                error = 'No selected file'
+            else:  
+                search_words = request.form.get('search_words')
+                if not search_words:
+                    error = 'Please enter search words'
+                else:
+                    pdf_text = process_pdf(file, second_file, search_words)
 
-
-            search_words = request.form.get('search_words')
-            if not search_words:
-                return render_template('index.html', error='Please enter search words')
-            
-
-            pdf_text = process_pdf(file,second_file,search_words)
-
-            selected_results = []  #reset
-
+                    selected_results = []  # reset
     else:  # Handle GET requests (initial page load)
         search_words = request.args.get('search_words')
         if search_words:
-            file = request.files['file']
-            second_file = request.files['second_file']
-            pdf_text = process_pdf(file, second_file, search_words)
-        else:
-            return render_template('index.html', pdf_text=None, search_words=None)  # Render without redirecting
+            error = 'Please upload files before searching.'  # Set error message
 
-    return render_template('index.html', pdf_text=pdf_text, search_words=search_words)
+    return render_template('index.html', pdf_text=pdf_text, search_words=search_words, error=error)
+
 
 
 @app.route('/view_pdf', methods=['POST'])
