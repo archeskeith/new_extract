@@ -62,8 +62,11 @@ def write_tables_to_excel(tables, excel_file):
     wb.save(excel_file)
 
 def process_pdf(file, second_file,search_words):
+    file.save(os.path.join(temp_dir, file.filename))
+        
     
     if (second_file):
+        second_file.save(os.path.join(temp_dir, second_file.filename))
         merger = PdfMerger()
         merger.append(file)
         merger.append(second_file)
@@ -74,7 +77,8 @@ def process_pdf(file, second_file,search_words):
         merger.close()
         doc = fitz.open("merged_pdf.pdf")
     else:
-        temp_name = os.path.join(current_dir,"merged_pdf.pdf")
+        temp_name = os.path.join(temp_dir, "merged_pdf.pdf")
+        # temp_name = os.path.join(current_dir,"merged_pdf.pdf")
         file.save(temp_name)
 
     doc = fitz.open("merged_pdf.pdf")
