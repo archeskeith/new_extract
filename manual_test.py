@@ -481,44 +481,59 @@ def statement_to_xlsx(input_statement,excel_file,dictionary):
     cleaned_statement = input_statement.replace('|', ',').replace('/n', '\n')
     lines = cleaned_statement.split('\n')
 
+    # Use a temporary directory
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_excel_path = os.path.join(temp_dir, 'exported.xlsx')  # Construct path inside temp_dir
 
-    # creating a new workbook to make a worksheet
-    wb = Workbook()
-    ws = wb.active
+        wb = Workbook()
+        ws = wb.active
+        for line in lines:
+            if line.strip():
+                row_data = line.split(',')
+                ws.append(row_data)
 
-    data = []
+    # save to the temporary file
+        wb.save(temp_excel_path)
 
-    for line in lines:
     
-        if line.strip() != '':
-            row_data = line.split(',')
-            data.append(row_data)
-            ws.append(row_data)
+    # # creating a new workbook to make a worksheet
+    # wb = Workbook()
+    # ws = wb.active
+
+    # data = []
+
+    # for line in lines:
+    
+    #     if line.strip() != '':
+    #         row_data = line.split(',')
+    #         data.append(row_data)
+    #         ws.append(row_data)
 
     # saving the workbook
-    xlsx_file_path = os.path.join(os.getcwd(), 'output', 'exported.xlsx')
-    print('XLSX FILE PATH: ',xlsx_file_path)
-    wb.save(xlsx_file_path)
+    # xlsx_file_path = os.path.join(os.getcwd(), 'output', 'exported.xlsx')
+    # print('XLSX FILE PATH: ',xlsx_file_path)
+    # wb.save(xlsx_file_path)
 
-    sheet_name = 'Financial Analysis'
-    column = 'D'
+        sheet_name = 'Financial Analysis'
+        column = 'D'
 
-    # finding the index of the sublist containing '2021' or '2022'
-    index_of_2021_or_2022,year = find_index_of_2021_or_2022(data)
-    if index_of_2021_or_2022 is not None:
-        print("Index of sublist containing '2021' or '2022':", index_of_2021_or_2022)
-    else:
-        print("No sublist containing '2021' or '2022' found.")
+        # finding the index of the sublist containing '2021' or '2022'
+        index_of_2021_or_2022,year = find_index_of_2021_or_2022(data)
+        if index_of_2021_or_2022 is not None:
+            print("Index of sublist containing '2021' or '2022':", index_of_2021_or_2022)
+        else:
+            print("No sublist containing '2021' or '2022' found.")
 
-    # creating a dictionary starting from the index where '2021' or '2022' is found
-    if index_of_2021_or_2022 is not None:
-        result_dict = create_dictionary_from_index(data, index_of_2021_or_2022)
-        
-    else:
-        print("No sublist containing '2021' or '2022' found.")
+        # creating a dictionary starting from the index where '2021' or '2022' is found
+        if index_of_2021_or_2022 is not None:
+            result_dict = create_dictionary_from_index(data, index_of_2021_or_2022)
+            
+        else:
+            print("No sublist containing '2021' or '2022' found.")
     
-    the_url = write_to_excel(sheet_name, year,result_dict,excel_file,dictionary)
-    return the_url
+        the_url = write_to_excel(sheet_name, year,result_dict,excel_file,dictionary)
+        # return the_url
+        return send_file(temp_excel_path, as_attachment=True, download_name='exported.xlsx')
     
 
 
