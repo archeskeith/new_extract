@@ -27,7 +27,7 @@ import fitz
 import csv
 import camelot
 from openpyxl import Workbook
-# next to you
+
 
 temp_dir = tempfile.mkdtemp()
 # from current chatgpt4 openapi API key access
