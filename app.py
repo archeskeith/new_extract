@@ -229,37 +229,91 @@ def back_to_home():
     # redirect back to the main page
     return redirect(url_for('index'))
 
+@app.route('/run_again', methods=['POST'])
+def run_again():
+    # if request.method == 'POST':
+    textarea_content = request.form.get('dictionaryTextbox')  
+    
+    
+    # find indexes
+    start_index = textarea_content.find('{')
+    end_index = textarea_content.rfind('}')
+    dictionary_str = textarea_content[start_index:end_index+1]
+
+    # parsing the string and making it into a dictionary
+    my_dict = ast.literal_eval(dictionary_str.strip())
+    
+    count = count_exported_csv_files(current_dir+'/output/')
+    the_url = transfer_to_excel(count,my_dict)
+    
+    # Copy the Excel file to a permanent location
+    source_file = os.path.join(temp_dir, 'output', 'exported.xlsx')  # Use temp_dir
+    destination_file = os.path.join(current_dir, 'output', 'exported.xlsx')
+    shutil.copyfile(source_file, destination_file)
+
+    # Clean up the temporary directory
+    shutil.rmtree(temp_dir)
+    
+    # delete_exported_csv_files(current_dir+'/output/')
+    # delete_temp_files()
+    
+    # source_file = 'uploads/new_version.xlsx'
+    # destination_file = os.path.join(current_dir, 'output', 'new_version.xlsx')
+
+    # shutil.copyfile(source_file, destination_file)
+
+    return render_template('complete.html',download_link=the_url)
+
+@app.route('/go_back',methods=['POST'])
+def back_to_home():
+    # clear variables and extracted files
+    delete_exported_csv_files(current_dir+'/output/')
+    delete_temp_files()
+    delete_thumbnails()
+    
+    # redirect back to the main page
+    return redirect(url_for('index'))
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    
     global global_excel_file
     global selected_results
     pdf_text = None
     search_words = None
-    error = None  # Initialize error variable
 
     if request.method == 'POST':
         if request.files['file'].filename != '':
+            
             file = request.files['file']
             second_file = request.files['second_file']
 
-            global_excel_file = str('output/') + 'new_version.xlsx'
 
+            global_excel_file = str('output/')+'new_version.xlsx'
+            
             if file.filename == '':
-                error = 'No selected file'
-            else:  
-                search_words = request.form.get('search_words')
-                if not search_words:
-                    error = 'Please enter search words'
-                else:
-                    pdf_text = process_pdf(file, second_file, search_words)
+                return render_template('index.html', error='No selected file')
 
-                    selected_results = []  # reset
+
+            search_words = request.form.get('search_words')
+            if not search_words:
+                return render_template('index.html', error='Please enter search words')
+            
+
+            pdf_text = process_pdf(file,second_file,search_words)
+
+            selected_results = []  #reset
+
     else:  # Handle GET requests (initial page load)
         search_words = request.args.get('search_words')
         if search_words:
-            error = 'Please upload files before searching.'  # Set error message
+            file = request.files['file']
+            second_file = request.files['second_file']
+            pdf_text = process_pdf(file, second_file, search_words)
+        else:
+            return render_template('index.html', pdf_text=None, search_words=None)  # Render without redirecting
 
-    return render_template('index.html', pdf_text=pdf_text, search_words=search_words, error=error)
+    return render_template('index.html', pdf_text=pdf_text, search_words=search_words)
 
 
 
