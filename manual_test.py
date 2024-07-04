@@ -27,8 +27,6 @@ import csv
 import camelot
 from openpyxl import Workbook
 
-
-temp_dir = tempfile.mkdtemp()
 # from current chatgpt4 openapi API key access
 # open.api_key = "${{ secrets.OPENAI_KEY }}"
 # open.api_key = "${{ creds.api_key }}"
@@ -39,8 +37,7 @@ current_dir = os.getcwd()
 
 # count the number of pages a pdf has
 def count_pages(pdf_path):
-    # with open(pdf_path, 'rb') as file:\
-    with open(os.path.join(temp_dir, pdf_path), 'rb') as file:
+    with open(pdf_path, 'rb') as file:
         pdf_reader = PyPDF2.PdfFileReader(file)
         num_pages = pdf_reader.numPages        
         return num_pages
@@ -61,33 +58,20 @@ def write_tables_to_excel(tables, excel_file):
     
     wb.save(excel_file)
 
-def handler(event, context):
-    temp_dir = tempfile.mkdtemp()
-    try:
-        return handle_request(app, event, context)
-    finally:
-        shutil.rmtree(temp_dir)
-
-
 def process_pdf(file, second_file,search_words):
-    file.save(os.path.join(temp_dir, file.filename))
-        
     
     if (second_file):
-        second_file.save(os.path.join(temp_dir, second_file.filename))
         merger = PdfMerger()
         merger.append(file)
         merger.append(second_file)
         # print("FILE: ",file)
         # # Save the merged PDF to a temporary file
-        temp_name = os.path.join(temp_dir,"merged_pdf.pdf")
+        temp_name = os.path.join(current_dir,"merged_pdf.pdf")
         merger.write(temp_name)
-        
         merger.close()
         doc = fitz.open("merged_pdf.pdf")
     else:
-        temp_name = os.path.join(temp_dir, "merged_pdf.pdf")
-        # temp_name = os.path.join(temp_dir,"merged_pdf.pdf")
+        temp_name = os.path.join(current_dir,"merged_pdf.pdf")
         file.save(temp_name)
 
     doc = fitz.open("merged_pdf.pdf")
@@ -135,13 +119,11 @@ def extract_text_from_page(page,pdf_path):
     
     thumbnail = image.resize((300, 300))
     
-    thumbnail_path = os.path.join(temp_dir, "static", "thumbnail_page_" + str(page.number+1) + ".png")
+    thumbnail_path = os.path.join(current_dir, "static", "thumbnail_page_" + str(page.number+1) + ".png")
 
     # static folder is needed for flask
-    # thumbnail_name = '../static/thumbnail_page_'+str(page.number+1)+'.png'
-    thumbnail.save(os.path.join(temp_dir, "thumbnail_page_" + str(page.number+1) + ".png"))
-
-    # thumbnail.save(thumbnail_path)
+    thumbnail_name = '../static/thumbnail_page_'+str(page.number+1)+'.png'
+    thumbnail.save(thumbnail_path)
     
     return {'page_number': page.number + 1, 'text': image_text, 'explanation': explanation, 'thumbnail_path': thumbnail_name}
 
@@ -205,7 +187,7 @@ def improve_table_structure(table_text):
 
 def pdf_to_csv_conversion(pdf_file, page_number, num_iterations=5):
     # accessing pdf and extracting each page
-    with open(os.path.join(temp_dir, pdf_file), 'rb') as file:
+    with open(os.path.join(current_dir, pdf_file), 'rb') as file:
         pdf_reader = PdfReader(file)
 
         # converting pdf to image
@@ -215,12 +197,12 @@ def pdf_to_csv_conversion(pdf_file, page_number, num_iterations=5):
         
         image = images[0]
 
-        image_path = os.path.join(temp_dir, f"temp_page_{page_number}.png")
+        image_path = os.path.join(current_dir, f"temp_page_{page_number}.png")
         image.save(image_path)
 
 def run_ocr_to_csv_multiple_times(original_image_text, page_number, num_iterations=5):
     results = []
-    image_path = os.path.join(temp_dir, f"temp_page_{page_number}.png")
+    image_path = os.path.join(current_dir, f"temp_page_{page_number}.png")
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
         # Submit OCR tasks to the executor
@@ -242,7 +224,7 @@ def run_ocr_to_csv_multiple_times(original_image_text, page_number, num_iteratio
 
 def run_ocr_to_csv(original_image_text, page_number):
     model_name = 'gpt-4-vision-preview'
-    image_path = os.path.join(temp_dir, f"temp_page_{page_number}.png")
+    image_path = os.path.join(current_dir, f"temp_page_{page_number}.png")
     messages = [
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": f"Convert the following OCR text to CSV:\n{original_image_text}. Copy as much as possible the text provided, but add in | (for new columns) and /n (for new rows), according to how it looks like on the image: {Image.open(image_path)}. Indicate '/n' if a new row is seen, based on the pdf image :{Image.open(image_path)}. Indicate a | if a new column is seen, based on the pdf image {Image.open(image_path)}. Make sure years are directly aligned with the columns they are placed at (IMPORTANT). Do it directly, no need to respond, just do the table."}
@@ -260,7 +242,7 @@ def run_ocr_to_csv(original_image_text, page_number):
         return f"Error: {response}", None
 
 def get_exported_files():
-    output_dir = os.path.join(temp_dir, 'output')
+    output_dir = os.path.join(os.getcwd(), 'output')
     exported_files = [file for file in os.listdir(output_dir) if file.startswith("exported") and file.endswith(".csv")]
     return exported_files
 
@@ -276,8 +258,7 @@ def statement_to_csv(input_statement,page):
     # splitting into lines
     lines = cleaned_statement.split('\n')
     print("PAGE CSV NUMBER: ",str(page))
-    # with open(temp_dir+'/output/exported'+str(page)+'.csv', 'w', newline='') as csv_file:
-    with open(os.path.join(temp_dir, 'output', f'exported{page}.csv'), 'w', newline='') as csv_file:  # Use temp_dir
+    with open(current_dir+'/output/exported'+str(page)+'.csv', 'w', newline='') as csv_file:
         print(csv_file)
         csv_writer = csv.writer(csv_file)
 
@@ -328,7 +309,7 @@ def delete_exported_csv_files(folder_path):
             print("Deleted file:", file_path)
 
 def delete_temp_files():
-    folder_path = temp_dir
+    folder_path = os.getcwd()
     files = os.listdir(folder_path)
     for file in files:
         if file.startswith("temp_page") and file.endswith(".png"):
@@ -387,7 +368,7 @@ def create_dictionary_from_index(data, start_index):
 #             ws.append(row_data)
 
 #     # saving the workbook
-#     xlsx_file_path = os.path.join(temp_dir, 'output', 'exported.xlsx')
+#     xlsx_file_path = os.path.join(os.getcwd(), 'output', 'exported.xlsx')
 #     print('XLSX FILE PATH: ',xlsx_file_path)
 #     wb.save(xlsx_file_path)
 
@@ -415,7 +396,7 @@ def create_dictionary_from_index(data, start_index):
 # def write_to_excel(sheet_name,year,result_dict,excel_file,dictionary):
 
     
-#     wb = load_workbook(temp_dir+'/'+excel_file)
+#     wb = load_workbook(current_dir+'/'+excel_file)
 #     print("WB: ",wb)
 #     ws = wb[sheet_name]
 
@@ -484,88 +465,59 @@ def create_dictionary_from_index(data, start_index):
 #                     ws[cell_address] = value
 #                     break
                 
-#     wb.save(temp_dir+'/'+excel_file)
-#     file_path = os.path.join(temp_dir,excel_file)
+#     wb.save(current_dir+'/'+excel_file)
+#     file_path = os.path.join(current_dir,excel_file)
 #     os.system(f'open {file_path}') 
 
 def statement_to_xlsx(input_statement,excel_file,dictionary):
     cleaned_statement = input_statement.replace('|', ',').replace('/n', '\n')
     lines = cleaned_statement.split('\n')
 
-    # Use a temporary directory
-    with tempfile.TemporaryDirectory() as temp_dir:
-        temp_excel_path = os.path.join(temp_dir, 'exported.xlsx')  # Construct path inside temp_dir
 
-        wb = Workbook()
-        ws = wb.active
-        for line in lines:
-            if line.strip():
-                row_data = line.split(',')
-                ws.append(row_data)
+    # creating a new workbook to make a worksheet
+    wb = Workbook()
+    ws = wb.active
 
-    # save to the temporary file
-        wb.save(temp_excel_path)
+    data = []
 
+    for line in lines:
     
-    # # creating a new workbook to make a worksheet
-    # wb = Workbook()
-    # ws = wb.active
-
-    # data = []
-
-    # for line in lines:
-    
-    #     if line.strip() != '':
-    #         row_data = line.split(',')
-    #         data.append(row_data)
-    #         ws.append(row_data)
+        if line.strip() != '':
+            row_data = line.split(',')
+            data.append(row_data)
+            ws.append(row_data)
 
     # saving the workbook
-    # xlsx_file_path = os.path.join(temp_dir, 'output', 'exported.xlsx')
-    # print('XLSX FILE PATH: ',xlsx_file_path)
-    # wb.save(xlsx_file_path)
+    xlsx_file_path = os.path.join(os.getcwd(), 'output', 'exported.xlsx')
+    print('XLSX FILE PATH: ',xlsx_file_path)
+    wb.save(xlsx_file_path)
 
-        sheet_name = 'Financial Analysis'
-        column = 'D'
+    sheet_name = 'Financial Analysis'
+    column = 'D'
 
-        # finding the index of the sublist containing '2021' or '2022'
-        index_of_2021_or_2022,year = find_index_of_2021_or_2022(data)
-        if index_of_2021_or_2022 is not None:
-            print("Index of sublist containing '2021' or '2022':", index_of_2021_or_2022)
-        else:
-            print("No sublist containing '2021' or '2022' found.")
+    # finding the index of the sublist containing '2021' or '2022'
+    index_of_2021_or_2022,year = find_index_of_2021_or_2022(data)
+    if index_of_2021_or_2022 is not None:
+        print("Index of sublist containing '2021' or '2022':", index_of_2021_or_2022)
+    else:
+        print("No sublist containing '2021' or '2022' found.")
 
-        # creating a dictionary starting from the index where '2021' or '2022' is found
-        if index_of_2021_or_2022 is not None:
-            result_dict = create_dictionary_from_index(data, index_of_2021_or_2022)
-            
-        else:
-            print("No sublist containing '2021' or '2022' found.")
+    # creating a dictionary starting from the index where '2021' or '2022' is found
+    if index_of_2021_or_2022 is not None:
+        result_dict = create_dictionary_from_index(data, index_of_2021_or_2022)
+        
+    else:
+        print("No sublist containing '2021' or '2022' found.")
     
-        the_url = write_to_excel(sheet_name, year,result_dict,excel_file,dictionary)
-        # return the_url
-        return send_file(temp_excel_path, as_attachment=True, download_name='exported.xlsx')
+    the_url = write_to_excel(sheet_name, year,result_dict,excel_file,dictionary)
+    return the_url
     
-def download_file(request, filename):
-    output_dir = os.path.join(temp_dir, 'output')  # Use temp_dir here
-    file_path = os.path.join(output_dir, filename)
-
-    try:
-        with open(file_path, 'rb') as f:
-            file_data = f.read()  # Read file data into memory
-        return Response(
-            file_data, 
-            mimetype='application/octet-stream',
-            headers={"Content-Disposition": f"attachment;filename={filename}"}
-        )
-    except FileNotFoundError:
-        abort(404)  # Return 404 if the file is not found
 
 
 def write_to_excel(sheet_name,year,result_dict,excel_file,dictionary):
 
     
-    wb = load_workbook(temp_dir+'/'+excel_file)
+    wb = load_workbook(current_dir+'/'+excel_file)
     print("WB: ",wb)
     ws = wb[sheet_name]
 
@@ -634,7 +586,7 @@ def write_to_excel(sheet_name,year,result_dict,excel_file,dictionary):
                     ws[cell_address] = value
                     break
     
-    wb.save(temp_dir+'/'+excel_file)
+    wb.save(current_dir+'/'+excel_file)
     # download_link = url_for('download_file', filename=excel_file)
     print('excel_file: ',excel_file)
     # file_name = f'exported.xlsx'
@@ -654,7 +606,7 @@ def write_to_excel(sheet_name,year,result_dict,excel_file,dictionary):
 # just to try it on
 # def main():
 
-#     with open(temp_dir+'/output/exported0.csv', 'r+') as file:
+#     with open(current_dir+'/output/exported0.csv', 'r+') as file:
 #         csv_data = file.read()
 #         statement_to_xlsx(csv_data)
 
