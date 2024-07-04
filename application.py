@@ -2,12 +2,11 @@
 
 
 from flask import Flask, render_template, request, send_from_directory, redirect, url_for,send_file, abort
-import streamlit as st
 import socket
 import os
-from werkzeug.datastructures import FileStorage
+# from werkzeug.datastructures import FileStorage
 from openpyxl import Workbook, load_workbook
-from pyngrok import ngrok
+# from pyngrok import ngrok
 from flask_ngrok import run_with_ngrok
 # from dotenv import load_dotenv
 from flask_cors import CORS, cross_origin
@@ -42,6 +41,7 @@ from manual_test import statement_to_xlsx
 from manual_test import count_exported_csv_files,delete_exported_csv_files,extract_numbers_from_string,delete_temp_files
 from manual_test import statement_to_csv, get_exported_files, run_ocr_to_csv, run_ocr_to_csv_multiple_times,improve_text_structure
 from manual_test import generate_explanation,delete_thumbnails,pdf_to_csv_conversion,extract_text_from_page,convert_page_to_image,process_pdf
+from serverless_wsgi import handle_request
 import ast
 import PyPDF2
 import signal
@@ -50,7 +50,7 @@ import sys
 
 
 app = Flask(__name__, static_url_path='/static')
-run_with_ngrok(app)
+# run_with_ngrok(app)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 UPLOAD_FOLDER = os.path.join('static', 'img_photo')
@@ -78,6 +78,10 @@ partners = {}
 @app.route('/favicon.ico')
 def favicon():
     abort(404)
+
+def handler(event, context):
+    return handle_request(app, event, context) 
+
 
 # def run_ngrok():
 #     auth_token = os.environ['api_key']
