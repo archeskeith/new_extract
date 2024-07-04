@@ -1,17 +1,15 @@
 # flask --app app.py --debug run
-# ^
+
 
 from flask import Flask, render_template, request, send_from_directory, redirect, url_for,send_file, abort
-# import streamlit as st
+import streamlit as st
 import socket
 import os
-import shutil
 from werkzeug.datastructures import FileStorage
 from openpyxl import Workbook, load_workbook
-# from pyngrok import ngrok
-# from flask_ngrok import run_with_ngrok
+from pyngrok import ngrok
+from flask_ngrok import run_with_ngrok
 # from dotenv import load_dotenv
-from gunicorn.app.base import BaseApplication
 from flask_cors import CORS, cross_origin
 import shutil
 import re 
@@ -52,7 +50,7 @@ import sys
 
 
 app = Flask(__name__, static_url_path='/static')
-# run_with_ngrok(app)
+run_with_ngrok(app)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 UPLOAD_FOLDER = os.path.join('static', 'img_photo')
@@ -201,61 +199,8 @@ def run_again():
     count = count_exported_csv_files(current_dir+'/output/')
     the_url = transfer_to_excel(count,my_dict)
     
-    # Copy the Excel file to a permanent location
-    source_file = os.path.join(temp_dir, 'output', 'exported.xlsx')  # Use temp_dir
-    destination_file = os.path.join(current_dir, 'output', 'exported.xlsx')
-    shutil.copyfile(source_file, destination_file)
-
-    # Clean up the temporary directory
-    shutil.rmtree(temp_dir)
-    
-    # delete_exported_csv_files(current_dir+'/output/')
-    # delete_temp_files()
-    
-    # source_file = 'uploads/new_version.xlsx'
-    # destination_file = os.path.join(current_dir, 'output', 'new_version.xlsx')
-
-    # shutil.copyfile(source_file, destination_file)
-
-    return render_template('complete.html',download_link=the_url)
-
-@app.route('/go_back',methods=['POST'])
-def back_to_home():
-    # clear variables and extracted files
     delete_exported_csv_files(current_dir+'/output/')
     delete_temp_files()
-    delete_thumbnails()
-    
-    # redirect back to the main page
-    return redirect(url_for('index'))
-
-@app.route('/run_again', methods=['POST'])
-def run_again():
-    # if request.method == 'POST':
-    textarea_content = request.form.get('dictionaryTextbox')  
-    
-    
-    # find indexes
-    start_index = textarea_content.find('{')
-    end_index = textarea_content.rfind('}')
-    dictionary_str = textarea_content[start_index:end_index+1]
-
-    # parsing the string and making it into a dictionary
-    my_dict = ast.literal_eval(dictionary_str.strip())
-    
-    count = count_exported_csv_files(current_dir+'/output/')
-    the_url = transfer_to_excel(count,my_dict)
-    
-    # Copy the Excel file to a permanent location
-    source_file = os.path.join(temp_dir, 'output', 'exported.xlsx')  # Use temp_dir
-    destination_file = os.path.join(current_dir, 'output', 'exported.xlsx')
-    shutil.copyfile(source_file, destination_file)
-
-    # Clean up the temporary directory
-    shutil.rmtree(temp_dir)
-    
-    # delete_exported_csv_files(current_dir+'/output/')
-    # delete_temp_files()
     
     # source_file = 'uploads/new_version.xlsx'
     # destination_file = os.path.join(current_dir, 'output', 'new_version.xlsx')
@@ -276,37 +221,38 @@ def back_to_home():
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    
     global global_excel_file
     global selected_results
     pdf_text = None
     search_words = None
-    error = None  # Initialize error variable
 
     if request.method == 'POST':
         if request.files['file'].filename != '':
+            
             file = request.files['file']
             second_file = request.files['second_file']
 
-            global_excel_file = str('output/') + 'new_version.xlsx'
-
+            # global_excel_file = request.files['excel_file']
+            # temp_filename = 'new_version.xlsx'
+            # global_excel_file = str('output/')+str(global_excel_file.filename)
+            global_excel_file = str('output/')+'new_version.xlsx'
+            # global_excel_file = str('uploads/')+temp_filename
+            
             if file.filename == '':
-                error = 'No selected file'
-            else:
-                search_words = request.form.get('search_words')
-                if not search_words:
-                    error = 'Please enter search words'
-                else:
-                    pdf_text = process_pdf(file, second_file, search_words)
-                    selected_results = []  # reset
-        else:
-            error = 'No selected file'  # Handle the case where no file is selected
-    else:  # Handle GET requests (initial page load)
-        search_words = request.args.get('search_words')
-        if search_words:
-            error = 'Please upload files before searching.'  # Set error message
+                return render_template('index.html', error='No selected file')
 
-    return render_template('index.html', pdf_text=pdf_text, search_words=search_words, error=error)
 
+            search_words = request.form.get('search_words')
+            if not search_words:
+                return render_template('index.html', error='Please enter search words')
+            
+
+            pdf_text = process_pdf(file,second_file,search_words)
+
+            selected_results = []  #reset
+
+    return render_template('index.html', pdf_text=pdf_text, search_words=search_words)
 
 
 @app.route('/view_pdf', methods=['POST'])
@@ -414,31 +360,15 @@ def uploaded_file(filename):
 def send_url():
     return public_url
 
-if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
-
-    
-# if __name__ == '__main__':
-#     app.run(host='0.0.0.0', port=8080, debug=True) 
-
-
-# if __name__ == '__main__':
-#     from waitress import serve
-#     serve(app, host="0.0.0.0", port=8080)  # Replace 8080 with your port
-
-# from waitress import serve
-# serve(app, host="0.0.0.0", port=8080)
-
-
-
 # if __name__ == '__main__':
 #     app.run()
 
-# if __name__ == '__main__':
-# # print('accessing global link, click: ',public_url)
-#     # app.run(port=port_no)
-#     # Define the URL of your Flask app
-#     # flask_app_url = public_url
-#     app.run(port=80)
+if __name__ == '__main__':
+# print('accessing global link, click: ',public_url)
+    # app.run(port=port_no)
+    # Define the URL of your Flask app
+    # flask_app_url = public_url
+    # app.run(port=80)
+    app.run()
     
     # st.markdown(f'<iframe src="{flask_app_url}" width="100%" height="1000px" scrolling="yes"></iframe>', unsafe_allow_html=True)
